@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stablecoin Payroll Savings Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: transparent;
+    }
+
+    .calculator-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .calculator-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .calculator-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .calculator-header p {
+      font-size: 16px;
+      color: #64648c;
+    }
+
+    .calculator-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 640px) {
+      .calculator-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .input-group .hint {
+      font-size: 12px;
+      color: #64648c;
+      margin-bottom: 6px;
+      font-weight: 400;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper .prefix {
+      position: absolute;
+      left: 14px;
+      color: #64648c;
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    .input-wrapper .suffix {
+      position: absolute;
+      right: 14px;
+      color: #64648c;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 2px solid #e2e2f0;
+      border-radius: 10px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fff;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    input.has-prefix {
+      padding-left: 32px;
+    }
+
+    input.has-suffix {
+      padding-right: 40px;
+    }
+
+    .input-group select {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 2px solid #e2e2f0;
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364648c' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+
+    .input-group select:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .calculate-btn {
+      width: 100%;
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .calculate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .calculate-btn:active {
+      transform: translateY(0);
+    }
+
+    .results-section {
+      display: none;
+      margin-top: 40px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .results-section.visible {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .results-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .savings-highlight {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    .savings-highlight .label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .savings-highlight .amount {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .savings-highlight .period {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 640px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-card {
+      background: #fff;
+      border: 2px solid #e2e2f0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .comparison-card.traditional {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .comparison-card.stablecoin {
+      border-color: #a7f3d0;
+      background: #ecfdf5;
+    }
+
+    .comparison-card h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comparison-card.traditional h3 {
+      color: #dc2626;
+    }
+
+    .comparison-card.stablecoin h3 {
+      color: #059669;
+    }
+
+    .comparison-card .total {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .comparison-card.traditional .total {
+      color: #dc2626;
+    }
+
+    .comparison-card.stablecoin .total {
+      color: #059669;
+    }
+
+    .cost-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cost-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #64648c;
+    }
+
+    .cost-item span:last-child {
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .benefits-section {
+      background: #f8f8fc;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .benefits-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1a1a2e;
+    }
+
+    .benefits-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .benefits-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #1a1a2e;
+    }
+
+    .benefit-item .icon {
+      width: 24px;
+      height: 24px;
+      background: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .benefit-item .icon svg {
+      width: 14px;
+      height: 14px;
+      stroke: #fff;
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #f8f8fc 0%, #eef2ff 100%);
+      border-radius: 12px;
+    }
+
+    .cta-section p {
+      font-size: 16px;
+      color: #64648c;
+      margin-bottom: 16px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .disclaimer {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    /* Hide number input spinners */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator-container">
+    <div class="calculator-header">
+      <h1>Stablecoin Payroll Savings Calculator</h1>
+      <p>See how much you could save by switching to stablecoin-based payroll</p>
+    </div>
+
+    <div class="calculator-grid">
+      <div class="input-group">
+        <label for="employees">Number of International Employees</label>
+        <span class="hint">Employees paid across borders</span>
+        <input type="number" id="employees" placeholder="50" min="1" max="100000">
+      </div>
+
+      <div class="input-group">
+        <label for="countries">Number of Countries</label>
+        <span class="hint">Where your employees are located</span>
+        <input type="number" id="countries" placeholder="5" min="1" max="200">
+      </div>
+
+      <div class="input-group">
+        <label for="avgSalary">Average Monthly Salary (USD)</label>
+        <span class="hint">Per employee</span>
+        <div class="input-wrapper">
+          <span class="prefix">$</span>
+          <input type="number" id="avgSalary" class="has-prefix" placeholder="5,000" min="100" max="1000000">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="payFrequency">Pay Frequency</label>
+        <span class="hint">How often you run payroll</span>
+        <select id="payFrequency">
+          <option value="1">Monthly</option>
+          <option value="2">Semi-monthly</option>
+          <option value="26">Bi-weekly</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="wireFee">Current Wire Transfer Fee (USD)</label>
+        <span class="hint">Per transaction</span>
+        <div class="input-wrapper">
+          <span class="prefix">$</span>
+          <input type="number" id="wireFee" class="has-prefix" placeholder="45" min="0" max="500">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="fxFee">Current FX/Conversion Fee</label>
+        <span class="hint">Percentage of transfer amount</span>
+        <div class="input-wrapper">
+          <input type="number" id="fxFee" class="has-suffix" placeholder="2.5" min="0" max="10" step="0.1">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="calculate-btn" onclick="calculateSavings()">Calculate My Savings</button>
+
+    <div id="results" class="results-section">
+      <div class="results-header">
+        <h2>Your Potential Savings</h2>
+      </div>
+
+      <div class="savings-highlight">
+        <div class="label">Estimated Annual Savings</div>
+        <div class="amount" id="totalSavings">$0</div>
+        <div class="period">per year</div>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="comparison-card traditional">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M15 9l-6 6M9 9l6 6"/>
+            </svg>
+            Traditional Wire Transfers
+          </h3>
+          <div class="total" id="traditionalTotal">$0</div>
+          <div class="cost-breakdown">
+            <div class="cost-item">
+              <span>Wire fees</span>
+              <span id="traditionalWire">$0</span>
+            </div>
+            <div class="cost-item">
+              <span>FX conversion fees</span>
+              <span id="traditionalFx">$0</span>
+            </div>
+            <div class="cost-item">
+              <span>Intermediary bank fees</span>
+              <span id="traditionalIntermediary">$0</span>
+            </div>
+            <div class="cost-item">
+              <span>Failed transfer costs (est.)</span>
+              <span id="traditionalFailed">$0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="comparison-card stablecoin">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            Stablecoin Payroll
+          </h3>
+          <div class="total" id="stablecoinTotal">$0</div>
+          <div class="cost-breakdown">
+            <div class="cost-item">
+              <span>Transaction fees</span>
+              <span id="stablecoinTx">$0</span>
+            </div>
+            <div class="cost-item">
+              <span>On/off ramp fees</span>
+              <span id="stablecoinRamp">$0</span>
+            </div>
+            <div class="cost-item">
+              <span>Platform fees</span>
+              <span id="stablecoinPlatform">$0</span>
+            </div>
+            <div class="cost-item">
+              <span>FX conversion</span>
+              <span id="stablecoinFx">$0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="benefits-section">
+        <h3>Additional Benefits of Stablecoin Payroll</h3>
+        <div class="benefits-list">
+          <div class="benefit-item">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span>Settlement in minutes, not days</span>
+          </div>
+          <div class="benefit-item">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span>No intermediary bank delays</span>
+          </div>
+          <div class="benefit-item">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span>24/7 payment processing</span>
+          </div>
+          <div class="benefit-item">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span>Full transaction transparency</span>
+          </div>
+          <div class="benefit-item">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span>Reduced compliance overhead</span>
+          </div>
+          <div class="benefit-item">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            </div>
+            <span>Easier multi-currency management</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-section">
+        <p>Ready to modernize your global payroll and start saving?</p>
+        <a href="#" class="cta-btn" id="ctaButton">Get a Custom Quote</a>
+      </div>
+
+      <p class="disclaimer">
+        * Estimates based on industry averages. Actual savings may vary based on your specific payment corridors,
+        volumes, and provider agreements. Stablecoin costs assume USDC/USDT on efficient networks.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Report height to parent window (for Webflow iframe)
+    function reportHeight() {
+      const height = document.body.scrollHeight;
+      window.parent.postMessage(
+        { type: "stablecoin-calculator:height", height: height },
+        "*"
+      );
+    }
+
+    // Report height on load, resize, and after calculations
+    window.addEventListener("load", reportHeight);
+    window.addEventListener("resize", reportHeight);
+
+    // Format currency
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    function calculateSavings() {
+      // Get input values with defaults
+      const employees = parseInt(document.getElementById('employees').value) || 50;
+      const countries = parseInt(document.getElementById('countries').value) || 5;
+      const avgSalary = parseFloat(document.getElementById('avgSalary').value) || 5000;
+      const payFrequency = parseInt(document.getElementById('payFrequency').value) || 1;
+      const wireFee = parseFloat(document.getElementById('wireFee').value) || 45;
+      const fxFeePercent = parseFloat(document.getElementById('fxFee').value) || 2.5;
+
+      // Calculate annual payments
+      const paymentsPerYear = payFrequency * 12;
+      const totalPaymentsPerYear = employees * paymentsPerYear;
+      const annualPayrollVolume = employees * avgSalary * 12;
+
+      // Traditional costs (annual)
+      const traditionalWireCosts = totalPaymentsPerYear * wireFee;
+      const traditionalFxCosts = annualPayrollVolume * (fxFeePercent / 100);
+      const traditionalIntermediaryCosts = totalPaymentsPerYear * 15; // ~$15 avg intermediary fee
+      const traditionalFailedCosts = totalPaymentsPerYear * 0.02 * 75; // 2% failure rate, $75 cost per failure
+      const traditionalTotal = traditionalWireCosts + traditionalFxCosts + traditionalIntermediaryCosts + traditionalFailedCosts;
+
+      // Stablecoin costs (annual)
+      // Transaction fees: ~$0.50-2 per transaction (using $1.50 avg for efficient networks)
+      const stablecoinTxCosts = totalPaymentsPerYear * 1.50;
+      // On/off ramp fees: ~0.5% for institutional volumes
+      const stablecoinRampCosts = annualPayrollVolume * 0.005;
+      // Platform/provider fees: ~0.25% of volume
+      const stablecoinPlatformCosts = annualPayrollVolume * 0.0025;
+      // FX conversion for non-USD: ~0.3% (much lower than traditional)
+      const stablecoinFxCosts = annualPayrollVolume * 0.003;
+      const stablecoinTotal = stablecoinTxCosts + stablecoinRampCosts + stablecoinPlatformCosts + stablecoinFxCosts;
+
+      // Total savings
+      const totalSavings = traditionalTotal - stablecoinTotal;
+
+      // Update UI
+      document.getElementById('totalSavings').textContent = formatCurrency(totalSavings);
+
+      document.getElementById('traditionalTotal').textContent = formatCurrency(traditionalTotal) + '/yr';
+      document.getElementById('traditionalWire').textContent = formatCurrency(traditionalWireCosts);
+      document.getElementById('traditionalFx').textContent = formatCurrency(traditionalFxCosts);
+      document.getElementById('traditionalIntermediary').textContent = formatCurrency(traditionalIntermediaryCosts);
+      document.getElementById('traditionalFailed').textContent = formatCurrency(traditionalFailedCosts);
+
+      document.getElementById('stablecoinTotal').textContent = formatCurrency(stablecoinTotal) + '/yr';
+      document.getElementById('stablecoinTx').textContent = formatCurrency(stablecoinTxCosts);
+      document.getElementById('stablecoinRamp').textContent = formatCurrency(stablecoinRampCosts);
+      document.getElementById('stablecoinPlatform').textContent = formatCurrency(stablecoinPlatformCosts);
+      document.getElementById('stablecoinFx').textContent = formatCurrency(stablecoinFxCosts);
+
+      // Show results
+      const resultsSection = document.getElementById('results');
+      resultsSection.classList.add('visible');
+
+      // Report new height after showing results
+      setTimeout(reportHeight, 100);
+
+      // Smooth scroll to results
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Allow Enter key to trigger calculation
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          calculateSavings();
+        }
+      });
+    });
+
+    // Set default values in placeholders
+    document.getElementById('employees').value = '';
+    document.getElementById('countries').value = '';
+    document.getElementById('avgSalary').value = '';
+    document.getElementById('wireFee').value = '';
+    document.getElementById('fxFee').value = '';
+  </script>
+</body>
+</html>
