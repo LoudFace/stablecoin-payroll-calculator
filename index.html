@@ -496,7 +496,7 @@
               <span id="traditionalIntermediary">$0</span>
             </div>
             <div class="cost-item">
-              <span>Failed transfer costs (est.)</span>
+              <span>Failed/delayed payment costs</span>
               <span id="traditionalFailed">$0</span>
             </div>
           </div>
@@ -591,8 +591,10 @@
       </div>
 
       <p class="disclaimer">
-        * Estimates based on industry averages. Actual savings may vary based on your specific payment corridors,
-        volumes, and provider agreements. Stablecoin costs assume USDC/USDT on efficient networks.
+        * Estimates based on 2025 industry data from Bankrate, Papaya Global, Rapyd, Solana, Circle, and Stripe.
+        Traditional costs include wire fees, FX markup, intermediary bank fees, and failed payment resolution.
+        Stablecoin costs assume USDC on efficient networks (Solana/Polygon/Base) with enterprise on/off-ramp providers.
+        Actual savings vary based on payment corridors, volumes, and provider agreements.
       </p>
     </div>
   </div>
@@ -636,21 +638,23 @@
       const annualPayrollVolume = employees * avgSalary * 12;
 
       // Traditional costs (annual)
+      // Sources: Bankrate, BOSS Money, Papaya Global, Rapyd B2B Payments Report
       const traditionalWireCosts = totalPaymentsPerYear * wireFee;
       const traditionalFxCosts = annualPayrollVolume * (fxFeePercent / 100);
-      const traditionalIntermediaryCosts = totalPaymentsPerYear * 15; // ~$15 avg intermediary fee
-      const traditionalFailedCosts = totalPaymentsPerYear * 0.02 * 75; // 2% failure rate, $75 cost per failure
+      const traditionalIntermediaryCosts = totalPaymentsPerYear * 20; // $10-50 range, using $20 avg (Papaya Global)
+      const traditionalFailedCosts = totalPaymentsPerYear * 0.03 * 60; // 3% failure/delay rate, $60 avg resolution cost
       const traditionalTotal = traditionalWireCosts + traditionalFxCosts + traditionalIntermediaryCosts + traditionalFailedCosts;
 
       // Stablecoin costs (annual)
-      // Transaction fees: ~$0.50-2 per transaction (using $1.50 avg for efficient networks)
-      const stablecoinTxCosts = totalPaymentsPerYear * 1.50;
-      // On/off ramp fees: ~0.5% for institutional volumes
-      const stablecoinRampCosts = annualPayrollVolume * 0.005;
-      // Platform/provider fees: ~0.25% of volume
-      const stablecoinPlatformCosts = annualPayrollVolume * 0.0025;
-      // FX conversion for non-USD: ~0.3% (much lower than traditional)
-      const stablecoinFxCosts = annualPayrollVolume * 0.003;
+      // Sources: Solana docs, Mural, Stripe, Circle
+      // Transaction fees: $0.01-0.50 on efficient networks (Solana, Polygon, Base) + platform processing
+      const stablecoinTxCosts = totalPaymentsPerYear * 0.50;
+      // On/off ramp fees: 0.5-1% for institutional volumes (using 0.75% avg)
+      const stablecoinRampCosts = annualPayrollVolume * 0.0075;
+      // Platform/provider fees: ~0.3% of volume for enterprise crypto payroll
+      const stablecoinPlatformCosts = annualPayrollVolume * 0.003;
+      // FX conversion at off-ramp: ~0.25% (lower than traditional due to USD stablecoin base)
+      const stablecoinFxCosts = annualPayrollVolume * 0.0025;
       const stablecoinTotal = stablecoinTxCosts + stablecoinRampCosts + stablecoinPlatformCosts + stablecoinFxCosts;
 
       // Total savings
